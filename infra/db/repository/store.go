@@ -4,25 +4,29 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Store struct {
-	*Queries
-	connPool *pgxpool.Pool
+type Store interface {
+	Querier
+	TransactionTx(ctx context.Context, args TransactionTxParams) (TransactionTxResult, error)
 }
 
-func NewStore(connPoll *pgxpool.Pool) *Store {
-	return &Store{
+type SQLStore struct {
+	connPool *pgxpool.Pool
+	*Queries
+}
+
+func NewStore(connPoll *pgxpool.Pool) Store {
+	return &SQLStore{
 		connPool: connPoll,
 		Queries:  New(connPoll),
 	}
 }
 
 // Execute the transaction (Tx)
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
-	tx, err := store.connPool.BeginTx(ctx, pgx.TxOptions{})
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
+	tx, err := store.connPool.Begin(ctx)
 
 	if err != nil {
 		return err
@@ -49,7 +53,7 @@ type TransactionTxParams struct {
 }
 
 type TransactionTxResult struct {
-	Transfer    Transaction `json:"transfer"`
+	Transaction Transaction `json:"Transaction"`
 	FromAccount Account     `json:"from_account"`
 	ToAccount   Account     `json:"to_account"`
 	FromEntry   Entry       `json:"from_entry"`
@@ -57,7 +61,7 @@ type TransactionTxResult struct {
 }
 
 // Perform a whole bank transaction wihtin one DB transaction.
-func (store *Store) TransferTx(ctx context.Context, args TransactionTxParams) (
+func (store *SQLStore) TransactionTx(ctx context.Context, args TransactionTxParams) (
 	TransactionTxResult, error,
 ) {
 	var result TransactionTxResult
@@ -66,7 +70,7 @@ func (store *Store) TransferTx(ctx context.Context, args TransactionTxParams) (
 		var err error
 
 		// Create a new bank Transaction
-		result.Transfer, err = q.CreateTransaction(ctx, CreateTransactionParams{
+		result.Transaction, err = q.CreateTransaction(ctx, CreateTransactionParams{
 			FromAccountID: args.FromAccountID,
 			ToAccountID:   args.ToAccountID,
 			Amount:        args.Amount,
