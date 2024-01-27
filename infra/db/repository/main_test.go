@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var testQueries *Queries
+var testStore Store
 
 const (
 	dbDriver = "postgres"
@@ -23,6 +23,6 @@ func TestMain(m *testing.M) {
 		log.Fatal("Could not create connection pool with DB: ", err)
 	}
 
-	testQueries = New(connPool)
+	testStore = NewStore(connPool)
 	os.Exit(m.Run())
 }
