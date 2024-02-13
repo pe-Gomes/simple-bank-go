@@ -29,6 +29,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install golang migrate-cli and sqlc
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.deb | sudo apt install ./migrate.linux-amd64.deb -y
+          curl -L https://downloads.sqlc.dev/sqlc_1.25.0_linux_amd64.tar.gz | sudo tar -C /usr/bin -xzf ./sqlc_1.25.0_linux_amd64.tar.gz
+          which migrate
+          which sqlc
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
