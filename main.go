@@ -7,16 +7,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pe-Gomes/simple-bank-go/api"
 	db "github.com/pe-Gomes/simple-bank-go/infra/db/repository"
-)
-
-const (
-	dbDriver      = "postgres"
-	dbSource      = "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
+	"github.com/pe-Gomes/simple-bank-go/util"
 )
 
 func main() {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	config, err := util.LoadConfig(".")
+
+	if err != nil {
+		log.Fatal("Error loading config:", err)
+	}
+
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 
 	if err != nil {
 		log.Fatal("Could not create connection pool with DB: ", err)
@@ -25,7 +26,7 @@ func main() {
 	store := db.NewStore(connPool)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 
 	if err != nil {
 		log.Fatal("Could not start server:", err)

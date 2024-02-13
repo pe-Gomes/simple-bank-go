@@ -7,17 +7,19 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pe-Gomes/simple-bank-go/util"
 )
 
 var testStore Store
 
-const (
-	dbDriver = "postgres"
-	dbSource = "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable"
-)
-
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	config, err := util.LoadConfig("../../../")
+
+	if err != nil {
+		log.Fatal("Error loading config:", err)
+	}
+
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 
 	if err != nil {
 		log.Fatal("Could not create connection pool with DB: ", err)
