@@ -13,8 +13,14 @@ dropdb:
 migrate-up:
 	@migrate -path infra/db/migration -database "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable" -verbose up
 
+migrate-up-1:
+	@migrate -path infra/db/migration -database "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
+
 migrate-down:
 	@migrate -path infra/db/migration -database "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable" -verbose down
+
+migrate-down-1:
+	@migrate -path infra/db/migration -database "postgresql://root:changeme@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 
 sqlc:
 	@sqlc generate
@@ -28,4 +34,4 @@ test:
 server:
 	@go run main.go
 
-.PHONY: postgres createdb dropdb migrate-up migrate-down sqlc test server mock
+.PHONY: postgres createdb dropdb migrate-up migrate-down migrate-up-1 migrate-down-1 sqlc test server mock
