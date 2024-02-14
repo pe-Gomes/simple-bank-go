@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	_ "go.uber.org/mock/mockgen/model"
 )
 
 type Store interface {
