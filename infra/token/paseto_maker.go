@@ -1,11 +1,13 @@
 package token
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	"aidanwoods.dev/go-paseto"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/chacha20poly1305"
 )
 
 type PasetoMaker struct {
@@ -13,11 +15,15 @@ type PasetoMaker struct {
 	implicit     []byte
 }
 
-func NewPasetoMaker() Maker {
+func NewPasetoMaker(symmetricKey string) (Maker, error) {
+	if len(symmetricKey) != chacha20poly1305.KeySize {
+		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
+	}
+
 	return &PasetoMaker{
 		symmetricKey: paseto.NewV4SymmetricKey(),
-		implicit:     []byte("my implicit nonce"),
-	}
+		implicit:     []byte(symmetricKey),
+	}, nil
 }
 
 func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
